@@ -111,7 +111,7 @@ class UsersListings extends React.Component {
       <TabPane key={userType} tabId={userType}>
         <div className="tab-pane">
           {groupedUsers[userType].map(
-            ({ userId, firstName, lastName, email, resumeURL }) => (
+            ({ userId, firstName, lastName, email, resume }) => (
               <div
                 className="col-lg-12 row border align-items-center my-2"
                 key={userId}
@@ -123,10 +123,10 @@ class UsersListings extends React.Component {
                   <div>
                     <b>Email:</b> {email}
                   </div>
-                  {resumeURL && (
+                  {resume && (
                     <>
                       <div>Resume:</div>
-                      <button onClick={() => this.handleDownload(resumeURL)}>
+                      <button onClick={() => this.handleDownload(resume)}>
                         Download
                       </button>
                     </>
