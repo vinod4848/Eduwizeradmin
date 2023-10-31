@@ -1,5 +1,6 @@
 import React from "react";
 import { getAllContacts } from "../../../Services/api";
+import { Card, CardBody, CardText, CardTitle, Col, Row } from "reactstrap";
 
 class ContactInfoListings extends React.Component {
   constructor(props) {
@@ -26,27 +27,27 @@ class ContactInfoListings extends React.Component {
     const { contacts } = this.state;
 
     return (
-
-      <div>
-        <div className="content">
-        <h1 className="mt-10">Contact List</h1>
-        {contacts.length > 0 ? (
-          <div>
-            {contacts.map((contact) => (
-              <div key={contact.id}>
-                <h2>Name: {contact.name}</h2>
-                <p>Email: {contact.email}</p>
-                <p>Phone: {contact.phone}</p>
-                <p>Message: {contact.message}</p>
-                <p>Created Date: {contact.createdTimestamp}</p>
-                <hr />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p>No contacts found.</p>
-        )}
-        </div>
+      <div className="content">
+        <h1 className="mt-4 mb-4">Contact List</h1>
+        <Row>
+          {contacts.length > 0 ? (
+            contacts.map((contact) => (
+              <Col sm="6" md="4" lg="3" key={contact.id} className="mb-4">
+                <Card className="h-100 shadow-sm hover">
+                  <CardBody>
+                    <CardTitle>Name: {contact.name}</CardTitle>
+                    <CardText>Email: {contact.email}</CardText>
+                    <CardText>Phone: {contact.phone}</CardText>
+                    <CardText>Message: {contact.message}</CardText>
+                    <CardText>Created Date: {contact.createdTimestamp}</CardText>
+                  </CardBody>
+                </Card>
+              </Col>
+            ))
+          ) : (
+            <p>No contacts found.</p>
+          )}
+        </Row>
       </div>
     );
   }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import {
   Row,
   Col,
@@ -7,22 +7,23 @@ import {
   NavLink,
   TabContent,
   TabPane,
+  Card,
+  CardBody,
+  CardTitle,
+  CardSubtitle,
+  CardText,
+  Button,
 } from "reactstrap";
 import classnames from "classnames";
-import { Link } from "react-router-dom";
 import { getAllUsers, deleteUserById } from "../../../Services/api";
 
-var BASEDIR = process.env.REACT_APP_BASEDIR;
-
-class UsersListings extends React.Component {
+class UsersListings extends Component {
   constructor(props) {
     super(props);
     this.state = {
       allUsersData: [],
-      activeTab: "student", // By default, show all users
+      activeTab: "student",
     };
-    this.getUsers = this.getUsers.bind(this);
-    this.handleDeleteUser = this.handleDeleteUser.bind(this);
   }
 
   async getUsers() {
@@ -30,7 +31,7 @@ class UsersListings extends React.Component {
       const resp = await getAllUsers();
       this.setState({ allUsersData: resp.data.data });
     } catch (error) {
-      console.log("error :>> ", error);
+      console.log("error: ", error);
     }
   }
 
@@ -40,53 +41,66 @@ class UsersListings extends React.Component {
     link.click();
   }
 
-  
-
   async handleDeleteUser(emailId) {
-    const prevState = this.state;
     try {
-      // Make API call to delete the user from the database
-      const response = await deleteUserById(emailId); // Assuming deleteUserById is an API function to delete a user
-      // Check if the deletion was successful based on the response data
+      const response = await deleteUserById(emailId);
       if (response && response.data && response.data.success === 1) {
-        // If the API call was successful, update the state to remove the deleted user
         this.setState((prevState) => ({
           allUsersData: prevState.allUsersData.filter((user) => user.email !== emailId),
         }));
-  
-        // Show a prompt for the deleted user
         alert(`User with email ${emailId} has been successfully deleted.`);
-  
-        // Refresh the page after a short delay (e.g., 1 second) to give the user a chance to see the prompt
         setTimeout(() => {
           window.location.reload();
         }, 1000);
       } else {
-        // If the API call failed or the response data indicates failure, show an error message
         console.error("Error deleting user:", response.data.message);
       }
     } catch (error) {
-      // Handle any other errors that may occur during the API call
       console.error("Error deleting user:", error);
     }
   }
-  
-
-
-  
 
   componentDidMount() {
     this.getUsers();
-      }
+  }
 
   toggleTab(tab) {
     this.setState({ activeTab: tab });
   }
 
+  renderUserCard(user) {
+    const { userId, firstName, lastName, email, resume } = user;
+    return (
+      <Col sm="6" md="4" lg="3" key={userId}>
+        <Card>
+          <CardBody className="d-flex flex-column">
+            <CardTitle>{`${firstName} ${lastName}`}</CardTitle>
+            <CardSubtitle>{email}</CardSubtitle>
+            {resume && (
+              <>
+                <CardText>Resume:</CardText>
+              </>
+            )}
+            <div className="mt-auto d-flex justify-content-between">
+              {resume && (
+                <Button color="primary" onClick={() => this.handleDownload(resume)}>
+                  Download
+                </Button>
+              )}
+              <Button color="danger" onClick={() => this.handleDeleteUser(email)}>
+                Delete
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      </Col>
+    );
+  }
+
   render() {
-    // Group users based on their userType
+    const { allUsersData, activeTab } = this.state;
     const groupedUsers = {};
-    this.state.allUsersData.forEach((user) => {
+    allUsersData.forEach((user) => {
       const { userType } = user;
       if (!groupedUsers[userType]) {
         groupedUsers[userType] = [];
@@ -94,11 +108,10 @@ class UsersListings extends React.Component {
       groupedUsers[userType].push(user);
     });
 
-    // Create tabs for each user type
     const tabItems = Object.keys(groupedUsers).map((userType) => (
       <NavItem key={userType}>
         <NavLink
-          className={classnames({ active: this.state.activeTab === userType })}
+          className={classnames({ active: activeTab === userType })}
           onClick={() => this.toggleTab(userType)}
         >
           {userType}
@@ -106,44 +119,12 @@ class UsersListings extends React.Component {
       </NavItem>
     ));
 
-    // Create tab content for each user type
     const tabContent = Object.keys(groupedUsers).map((userType) => (
       <TabPane key={userType} tabId={userType}>
-        <div className="tab-pane">
-          {groupedUsers[userType].map(
-            ({ userId, firstName, lastName, email, resume }) => (
-              <div
-                className="col-lg-12 row border align-items-center my-2"
-                key={userId}
-              >
-                <div className="col-6">
-                  <div>
-                    <b>Name:</b> {`${firstName} ${lastName}`}
-                  </div>
-                  <div>
-                    <b>Email:</b> {email}
-                  </div>
-                  {resume && (
-                    <>
-                      <div>Resume:</div>
-                      <button onClick={() => this.handleDownload(resume)}>
-                        Download
-                      </button>
-                    </>
-                  )}
-                </div>
-                <div className="col-6">
-                  <button onClick={() => this.handleDeleteUser(email)}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )
-          )}
-        </div>
+        <Row>{groupedUsers[userType].map((user) => this.renderUserCard(user))}</Row>
       </TabPane>
     ));
-      console.log(groupedUsers, "xfxfxchcg hvc")
+
     return (
       <div>
         <div className="content">
@@ -154,7 +135,6 @@ class UsersListings extends React.Component {
                   <h1 className="title">Users</h1>
                 </div>
               </div>
-
               <div className="col-12">
                 <section className="box">
                   <header className="panel_header align-items-center row justify-content-between">
@@ -162,12 +142,10 @@ class UsersListings extends React.Component {
                   </header>
                   <div className="content-body">
                     <div>
-                      <div className="col-lg-12 row ">
+                      <div className="col-lg-12 row">
                         <Nav tabs>{tabItems}</Nav>
                       </div>
-                      <TabContent activeTab={this.state.activeTab}>
-                        {tabContent}
-                      </TabContent>
+                      <TabContent activeTab={activeTab}>{tabContent}</TabContent>
                     </div>
                   </div>
                 </section>
