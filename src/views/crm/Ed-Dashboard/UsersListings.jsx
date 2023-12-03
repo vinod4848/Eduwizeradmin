@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { FaUser, FaEnvelope, FaDownload, FaTrash } from "react-icons/fa";
 import {
   Row,
   Col,
@@ -46,7 +47,9 @@ class UsersListings extends Component {
       const response = await deleteUserById(emailId);
       if (response && response.data && response.data.success === 1) {
         this.setState((prevState) => ({
-          allUsersData: prevState.allUsersData.filter((user) => user.email !== emailId),
+          allUsersData: prevState.allUsersData.filter(
+            (user) => user.email !== emailId
+          ),
         }));
         alert(`User with email ${emailId} has been successfully deleted.`);
         setTimeout(() => {
@@ -71,23 +74,45 @@ class UsersListings extends Component {
   renderUserCard(user) {
     const { userId, firstName, lastName, email, resume } = user;
     return (
-      <Col sm="6" md="4" lg="3" key={userId}>
-        <Card>
+      <Col sm="4" key={userId} className="mb-4">
+        <Card className="custom-card">
           <CardBody className="d-flex flex-column">
-            <CardTitle>{`${firstName} ${lastName}`}</CardTitle>
-            <CardSubtitle>{email}</CardSubtitle>
+            <div className="d-flex align-items-center mb-2 custom-username">
+              <FaUser
+                className="me-2 custom-icon-user"
+                style={{ color: "#B22222" }}
+              />
+              <CardTitle>{`${firstName} ${lastName}`}</CardTitle>
+            </div>
+            <div className="d-flex align-items-center mb-2 custom-email">
+              <FaEnvelope
+                className="me-2 custom-icon-email"
+                style={{ color: "#B22222" }}
+              />
+              <CardSubtitle>{email}</CardSubtitle>
+            </div>
             {resume && (
-              <>
-                <CardText>Resume:</CardText>
-              </>
+              <div>
+                <CardText className="custom-resume-text">Resume:</CardText>
+              </div>
             )}
             <div className="mt-auto d-flex justify-content-between">
               {resume && (
-                <Button color="primary" onClick={() => this.handleDownload(resume)}>
+                <Button
+                  color="primary"
+                  size="sm"
+                  onClick={() => this.handleDownload(resume)}
+                >
+                  <FaDownload className="me-1" />
                   Download
                 </Button>
               )}
-              <Button color="danger" onClick={() => this.handleDeleteUser(email)}>
+              <Button
+                color="danger"
+                size="sm"
+                onClick={() => this.handleDeleteUser(email)}
+              >
+                <FaTrash className="me-1" />
                 Delete
               </Button>
             </div>
@@ -121,7 +146,9 @@ class UsersListings extends Component {
 
     const tabContent = Object.keys(groupedUsers).map((userType) => (
       <TabPane key={userType} tabId={userType}>
-        <Row>{groupedUsers[userType].map((user) => this.renderUserCard(user))}</Row>
+        <Row>
+          {groupedUsers[userType].map((user) => this.renderUserCard(user))}
+        </Row>
       </TabPane>
     ));
 
@@ -145,7 +172,9 @@ class UsersListings extends Component {
                       <div className="col-lg-12 row">
                         <Nav tabs>{tabItems}</Nav>
                       </div>
-                      <TabContent activeTab={activeTab}>{tabContent}</TabContent>
+                      <TabContent activeTab={activeTab}>
+                        {tabContent}
+                      </TabContent>
                     </div>
                   </div>
                 </section>
